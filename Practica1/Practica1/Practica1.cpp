@@ -15,7 +15,7 @@
 using namespace std;
 
 // Muestra todos los elementos de v separados por un espacio por salida estandar
-void mostrar(vector<string>& v) {
+void mostrar(const vector<string>& v) {
     for (auto e : v) {
         cout << e << " ";
     }
@@ -47,12 +47,12 @@ void acumular(vector<int>& cuenta) {
 // v el vector de numeros (formato string), n_dig el numero de digitos
 // ordena v con el algoritmo de radix LSF
 void radix(vector<string>& v, const int n_dig) {
-    // Iterar desde el digito menos significativo
     vector<int> cuenta = CUENTA_INICIAL; // lleva la cuenta del numero de veces que aparece cada digito
     int n_eltos = v.size();
     vector<string> aux(n_eltos); // auxiliar del mismo tamaño que el original
+    // Iterar desde el digito menos significativo
     for (int i = n_dig - 1; i >= 0; i--) {
-        // Si se quieren ver la evolucion con las iteraciones, descomentar estas tres lineas:
+        // Si se quiere ver la evolucion con las iteraciones, descomentar estas tres lineas:
             //cout << "------ iter " << n_dig - i << " ------\n";
             //mostrar(v);
             //cout << "--------------------\n";
@@ -72,7 +72,11 @@ void radix(vector<string>& v, const int n_dig) {
             aux[indice] = elemento;
         }
         // Finalmente, actualizamos el vector original:
-        v = aux; // Comprobar que esto funcione, tengo mis dudas -- si que funciona
+        v = aux;    // Comprobar que esto funcione, tengo mis dudas -- si que funciona
+                    // Idea para eficiencia (si merece la pena depende de como de rapida sea la operacion v=aux): 
+                    // en la siguiente iteracion, tomar aux como original y v como auxiliar, 
+                    // con esto, te ahorras la mitad de las copias 
+
         // Y resetemos el vector de cuenta:
         cuenta = CUENTA_INICIAL;
     }
