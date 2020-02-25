@@ -23,18 +23,18 @@ void mostrar(vector<string>& v) {
     cout << endl;
 }
 
-
 // Rellena los N_ELEMENTOS primeros elementos de v con strings de longitud n_digs que representan numeros del 0 al 10^n_digs-1
 void inicializar(vector<string>& v, const int n_digs) {
   
     for (int i = 0; i < N_ELEMENTOS; i++) {
         long num = rand() % long(pow(10.0, n_digs)); // numero aleatorio entre 0 y 10^n_digs, es decir, un numero con n_digs
+        // Nota: parece que para valores de n_digs>7, casi todos tienen menos digitos... Probar otra f que no sea rand?
+        // long no lo ha funcionado
         string num_str = to_string(num); // en string
         while (num_str.length() < n_digs) { // si tiene menos de n_digs digitos, se añaden 0s a la izq
             num_str = "0" + num_str;
         }
         v[i] = num_str;
-        // TODO: strings aleatorias de long n
     }
 }
 
@@ -44,7 +44,6 @@ void acumular(vector<int>& cuenta) {
         cuenta[i] += cuenta[i - 1];
     }
 }
-
 
 // v el vector de numeros (formato string), n_dig el numero de digitos
 // ordena v con el algoritmo de radix LSF
@@ -73,13 +72,11 @@ void radix(vector<string>& v, const int n_dig) {
             aux[indice] = elemento;
         }
         // Finalmente, actualizamos el vector original:
-        v = aux; // Comprobar que esto funcione, tengo mis dudas
-        // Y resetear la cuenta:
+        v = aux; // Comprobar que esto funcione, tengo mis dudas -- si que funciona
+        // Y resetemos el vector de cuenta:
         cuenta = CUENTA_INICIAL;
     }
 }
-
-
 
 // v el vector de numeros (formato string), n el numero de digitos
 // ordena v con el algoritmo de radix LSF
@@ -96,10 +93,7 @@ void radix_rec(vector<string>& v, const int n, const int j) {
         }
         cuenta = CUENTA_INICIAL;
     }
-
 }
-
-
 
 int main()
 {
