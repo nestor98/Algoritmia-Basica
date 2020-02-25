@@ -9,11 +9,10 @@
 
 // El vector de la cuenta de cada digito se inicializa con -1 en el 0 para que el algoritmo funcione correctamente:
 #define CUENTA_INICIAL {-1,0,0,0,0,0,0,0,0,0}
-
+// Numero de elementos del vector:
 #define N_ELEMENTOS 100000
 
 using namespace std;
-
 
 // Muestra todos los elementos de v separados por un espacio por salida estandar
 void mostrar(vector<string>& v) {
@@ -23,10 +22,10 @@ void mostrar(vector<string>& v) {
     cout << endl;
 }
 
-// Rellena los N_ELEMENTOS primeros elementos de v con strings de longitud n_digs que representan numeros del 0 al 10^n_digs-1
+// Rellena los n_eltos primeros elementos de v con strings de longitud n_digs que representan numeros del 0 al 10^n_digs-1
 void inicializar(vector<string>& v, const int n_digs) {
-  
-    for (int i = 0; i < N_ELEMENTOS; i++) {
+    int n_eltos = v.size();
+    for (int i = 0; i < n_eltos; i++) {
         long num = rand() % long(pow(10.0, n_digs)); // numero aleatorio entre 0 y 10^n_digs, es decir, un numero con n_digs
         // Nota: parece que para valores de n_digs>7, casi todos tienen menos digitos... Probar otra f que no sea rand?
         // long no lo ha funcionado
@@ -50,7 +49,8 @@ void acumular(vector<int>& cuenta) {
 void radix(vector<string>& v, const int n_dig) {
     // Iterar desde el digito menos significativo
     vector<int> cuenta = CUENTA_INICIAL; // lleva la cuenta del numero de veces que aparece cada digito
-    vector<string> aux(v.size()); // auxiliar del mismo tamaño que el original
+    int n_eltos = v.size();
+    vector<string> aux(n_eltos); // auxiliar del mismo tamaño que el original
     for (int i = n_dig - 1; i >= 0; i--) {
         // Si se quieren ver la evolucion con las iteraciones, descomentar estas tres lineas:
             //cout << "------ iter " << n_dig - i << " ------\n";
@@ -65,7 +65,7 @@ void radix(vector<string>& v, const int n_dig) {
         // Acumulamos las cuentas de los digitos de izquierda a dcha:
         acumular(cuenta);
         // Y recolocamos cada elemento del original en el auxiliar según la cuenta:
-        for (int j = N_ELEMENTOS - 1; j >= 0; j--) { // (empezando por la dcha)
+        for (int j = n_eltos - 1; j >= 0; j--) { // (empezando por la dcha)
             string elemento = v[j]; // Tomamos el j-esimo elemento
             int digito = elemento[i] - '0'; // Y su i-esimo digito
             int indice = cuenta[digito]--; // Posicion en el auxiliar (y reducimos esa cuenta)
@@ -97,10 +97,12 @@ void radix_rec(vector<string>& v, const int n, const int j) {
 
 int main()
 {
-    int n_digs;
+    int n_digs, n_eltos;
     cout << "Introduce el numero de digitos: " << flush;
     cin >> n_digs; 
-    vector<string> v(N_ELEMENTOS); // Se inicializa con N_ELEMENTOS
+    cout << "Y el numero de elementos a ordenar: " << flush;
+    cin >> n_eltos;
+    vector<string> v(n_eltos); // Se inicializa con n_eltos
     inicializar(v, n_digs); // Valores aleatorios de n_digs cada uno
     cout << "Inicial:" << endl;
     mostrar(v);
