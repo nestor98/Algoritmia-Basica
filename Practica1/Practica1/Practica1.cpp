@@ -58,77 +58,27 @@ void acumular(vector<int>& cuenta) {
 
 // v el vector de numeros (formato string), n_dig el numero de digitos
 // ordena v con el algoritmo de radix LSF
-void radix(vector<string>& v, const int n_dig) {
+void radix_rec(vector<string>& v, const int n_dig, const int i_dig) {
     vector<int> cuenta = CUENTA_INICIAL; // lleva la cuenta del numero de veces que aparece cada digito
     int n_eltos = v.size();
     vector<string> aux(n_eltos); // auxiliar del mismo tamaño que el original
-    // Iterar desde el digito menos significativo
-    for (int i = n_dig - 1; i >= 0; i--) {
-        // Si se quiere ver la evolucion con las iteraciones, descomentar estas tres lineas:
-            //cout << "------ iter " << n_dig - i << " ------\n";
-            //mostrar(v);
-            //cout << "--------------------\n";
-        // Para cada digito de los numeros en v:
-        for (auto e : v) {
-            int digito = e[i] - '0'; // i-ésimo digito
-            //cout << "digito: " << digito << endl;
-            cuenta[digito]++; // Contamos el digito correspondiente
-        }
-        // Acumulamos las cuentas de los digitos de izquierda a dcha:
-        acumular(cuenta);
-        // Y recolocamos cada elemento del original en el auxiliar según la cuenta:
-        for (int j = n_eltos - 1; j >= 0; j--) { // (empezando por la dcha)
-            string elemento = v[j]; // Tomamos el j-esimo elemento
-            int digito = elemento[i] - '0'; // Y su i-esimo digito
-            int indice = cuenta[digito]--; // Posicion en el auxiliar (y reducimos esa cuenta)
-            aux[indice] = elemento;
-        }
-        // Finalmente, actualizamos el vector original:
-        v = aux;    // Comprobar que esto funcione, tengo mis dudas -- si que funciona
-                    // Idea para eficiencia (si merece la pena depende de como de rapida sea la operacion v=aux): 
-                    // en la siguiente iteracion, tomar aux como original y v como auxiliar, 
-                    // con esto, te ahorras la mitad de las copias 
-
-        // Y resetemos el vector de cuenta:
-        cuenta = CUENTA_INICIAL;
+    for (auto e : v) {
+        int digito = e[i_dig] - '0'; // i-ésimo digito
+        //cout << "digito: " << digito << endl;
+        cuenta[digito]++; // Contamos el digito correspondiente
     }
-}
-
-// v el vector de numeros (formato string), n_dig el numero de digitos
-// ordena v con el algoritmo de radix LSF
-void radix_rec(vector<string>& v, const int n_dig) {
-    vector<int> cuenta = CUENTA_INICIAL; // lleva la cuenta del numero de veces que aparece cada digito
-    int n_eltos = v.size();
-    vector<string> aux(n_eltos); // auxiliar del mismo tamaño que el original
-    // Iterar desde el digito menos significativo
-    for (int i = n_dig - 1; i >= 0; i--) {
-        // Si se quiere ver la evolucion con las iteraciones, descomentar estas tres lineas:
-            //cout << "------ iter " << n_dig - i << " ------\n";
-            //mostrar(v);
-            //cout << "--------------------\n";
-        // Para cada digito de los numeros en v:
-        for (auto e : v) {
-            int digito = e[i] - '0'; // i-ésimo digito
-            //cout << "digito: " << digito << endl;
-            cuenta[digito]++; // Contamos el digito correspondiente
-        }
-        // Acumulamos las cuentas de los digitos de izquierda a dcha:
-        acumular(cuenta);
-        // Y recolocamos cada elemento del original en el auxiliar según la cuenta:
-        for (int j = n_eltos - 1; j >= 0; j--) { // (empezando por la dcha)
-            string elemento = v[j]; // Tomamos el j-esimo elemento
-            int digito = elemento[i] - '0'; // Y su i-esimo digito
-            int indice = cuenta[digito]--; // Posicion en el auxiliar (y reducimos esa cuenta)
-            aux[indice] = elemento;
-        }
-        // Finalmente, actualizamos el vector original:
-        radix(aux);    // Comprobar que esto funcione, tengo mis dudas -- si que funciona
-                    // Idea para eficiencia (si merece la pena depende de como de rapida sea la operacion v=aux): 
-                    // en la siguiente iteracion, tomar aux como original y v como auxiliar, 
-                    // con esto, te ahorras la mitad de las copias 
-
-        // Y resetemos el vector de cuenta:
-        cuenta = CUENTA_INICIAL;
+    // Acumulamos las cuentas de los digitos de izquierda a dcha:
+    acumular(cuenta);
+    // Y recolocamos cada elemento del original en el auxiliar según la cuenta:
+    for (int j = n_eltos - 1; j >= 0; j--) { // (empezando por la dcha)
+        string elemento = v[j]; // Tomamos el j-esimo elemento
+        int digito = elemento[i_dig] - '0'; // Y su i-esimo digito
+        int indice = cuenta[digito]--; // Posicion en el auxiliar (y reducimos esa cuenta)
+        aux[indice] = elemento;
+    }
+    // Finalmente, actualizamos el vector original:
+    if(i_dig > 0){
+        radix_rec(aux, n_dig, i_dig-1);
     }
 }
 
@@ -148,8 +98,13 @@ int main()
     vector<string> v(n_eltos); // Se inicializa con n_eltos
     inicializar(v, n_digs); // Valores aleatorios de n_digs cada uno
 
-    vector<string> v_aux(v);
-    //v_aux = v;
+    //vector<string> v_aux(v);
+
+    vector<unsigned long long> v_aux(n_eltos);
+    for(auto e : v){
+        v_aux.push_back(stoull(e));
+    }
+
 
     t1 = hrc::now();
     sort(v_aux.begin(), v_aux.end());
@@ -162,16 +117,16 @@ int main()
 
 
     t1 = hrc::now();
-    radix(v,n_digs); // Se ordena
+    radix_rec(v,n_digs,n_digs-1); // Se ordena
     t2 = hrc::now();
     chrono::duration<double> tiempo_radix = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
 
 
     cout << "Ordenado:" << endl;
-    mostrar(v);
+    //mostrar(v);
 
     cout << "Ordenado2:" << endl;
-    mostrar(v_aux);
+    //mostrar(v_aux);
 
     cout << "Tiempo Radix: " << tiempo_radix.count() << endl;
     cout << "Tiempo Sort: " << tiempo_sort.count() << endl;
