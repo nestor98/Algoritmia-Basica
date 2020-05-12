@@ -1,6 +1,4 @@
 
-
-
 class Escenario:
     def __init__(self, dimensiones, pos_ini, n_bombas):
         self.dimensiones = dimensiones
