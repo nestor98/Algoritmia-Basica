@@ -12,7 +12,6 @@ class Nodo:
     def coste(self):
         return self.coste
 
-
     def __str__(self):
         return 'pos: ' + str(self.pos) + '\n' + 'coste: ' + str(self.coste)
 
