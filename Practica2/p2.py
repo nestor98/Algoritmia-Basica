@@ -10,35 +10,24 @@ def list_to_tuple(lista):
 if __name__ == '__main__':
     nescenarios = 0
     i_escenario = 0 # indice dentro del escenario
-    for i,line in enumerate(fileinput.input(sys.argv[1])):
+    en_escenario = True
+    escenarios = []
+    dimensiones = 0
+    pos_ini = 0
+    n_bombas = 0
+    for i, line in enumerate(fileinput.input(sys.argv[1])):
         lista=line[:-1].split(' ')
         if i == 1: # primera linea
             nescenarios = int(lista[0])
+        elif i_escenario == 0:
+            dimensiones = list_to_tuple(lista)#(int(lista[0]), int(lista[1])) # tupla con las dimensiones
+            i_escenario += 1
+        elif i_escenario == 1:
+            pos_ini = list_to_tuple(lista)
+            i_escenario += 1
+        elif i_escenario == 2:
+            n_bombas = int(lista[0])
+            escenarios.append(Escenario(dimensiones, pos_ini, n_bombas))
+            i_escenario += 1
         else:
-            dimensiones = (int(lista[0]), int(lista[1])) # tupla con las dimensiones
-            pos_ini = fileinput.input(sys.argv[1])[:-1].split(' ')
-
-            escenarios[0] = Escenario(dimensiones)
-
-
-
-        if len(lista)>1:
-            if i > 1: # sig lineas
-                if i%2==0: # primera
-                    if len(lista) > 3:
-                        exit(1)
-                        print('DEMASIADOS NUMEROSSSSSSSSS')
-                                # id, num_b, dias_libro,  tiempo_sign
-                    #print(lista)
-                    biblio = Biblioteca(int(i/2)-1, lista[0], lista[2], lista[1])
-                    biblios.append(biblio)
-                else:
-                    biblios[-1].set_books(lista, [libros[int(i)] for i in lista])
-
-
-            elif i>0: # segunda, libros
-                libros = lista
-            else: # primera, numeros
-                n_libros = lista[0]
-                n_biblio = lista[1]
-                n_dias = lista[2]
+            pass
