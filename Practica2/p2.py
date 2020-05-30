@@ -1,44 +1,64 @@
-import fileinput
 import sys
 from escenario import Escenario
+from solucionar import solucionar
+from timeit import default_timer as timer
+from arbol import Nodo
 
 
-def list_to_tuple(lista):
-    return (int(lista[0]), int(lista[0]))
+def line_to_tuple(linea):
+    lista = linea.replace("\n", "").split(' ')
+    return (int(lista[0]), int(lista[1]))
+
+
+def leer_escenario(f):
+    # la primera línea son las dimensiones
+    dim = line_to_tuple(f.readline())
+
+    # la segunda línea es la posición inicial
+    pos_ini = line_to_tuple(f.readline())
+
+    # la tercera es el número de minas
+    n_minas = int(f.readline().replace("\n", ""))
+
+    # crear objeto de tipo escenario
+    e = Escenario(dim, pos_ini, n_minas)
+
+    for _ in range(n_minas):
+        e.addMina(line_to_tuple(f.readline()))  # añadir mina al escenario
+
+    return e
+
+
+def recorrer(n: Nodo):
+    asdf = 1
+    for e in n.listaHijos:
+        asdf += recorrer(e)
+    return asdf
 
 
 if __name__ == '__main__':
-    nescenarios = 0
-    i_escenario = 0 # indice dentro del escenario
-    for i,line in enumerate(fileinput.input(sys.argv[1])):
-        lista=line[:-1].split(' ')
-        if i == 1: # primera linea
-            nescenarios = int(lista[0])
-        else:
-            dimensiones = (int(lista[0]), int(lista[1])) # tupla con las dimensiones
-            pos_ini = fileinput.input(sys.argv[1])[:-1].split(' ')
 
-            escenarios[0] = Escenario(dimensiones)
+    i_escenario = 0  # indice dentro del escenario
+    f = open(sys.argv[1], "r")  # leer archivo
+    f_out = open(sys.argv[2], "w")
 
+    n = int(f.readline().replace("\n", ""))  # leer el numero de escenarios
+    escenarios = []
 
+    for i in range(n):
+        escenarios.append(leer_escenario(f))
 
-        if len(lista)>1:
-            if i > 1: # sig lineas
-                if i%2==0: # primera
-                    if len(lista) > 3:
-                        exit(1)
-                        print('DEMASIADOS NUMEROSSSSSSSSS')
-                                # id, num_b, dias_libro,  tiempo_sign
-                    #print(lista)
-                    biblio = Biblioteca(int(i/2)-1, lista[0], lista[2], lista[1])
-                    biblios.append(biblio)
-                else:
-                    biblios[-1].set_books(lista, [libros[int(i)] for i in lista])
+    for e in escenarios:
+        start = timer()
+        upperBound, soluciones, arbol = solucionar(e)
+        end = timer()
+        f_out.write(str(upperBound) + " " + str(end - start) + "\n")
+        f_out.flush()
 
+        asdf = 0
+        for e in arbol.listaHijos:
+            asdf = recorrer(arbol)
+        print(asdf)
 
-            elif i>0: # segunda, libros
-                libros = lista
-            else: # primera, numeros
-                n_libros = lista[0]
-                n_biblio = lista[1]
-                n_dias = lista[2]
+    f.close()
+    f_out.close()
