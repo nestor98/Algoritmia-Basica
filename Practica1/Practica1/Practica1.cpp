@@ -1,5 +1,10 @@
-// Practica1.cpp : Este archivo contiene la función "main". La ejecución del programa comienza y termina ahí.
-//
+// Practica 1 de Algoritmia Basica
+// Autores: Nestor Monzon y Andres Otero
+// Compilación: g++ Practica1.cpp -std=c++11 -o Practica1
+// Ejecución: ./Practica1 [n_digs] [n_eltos] [mostrar detalles (S/N)]
+//            Si se invoca sin parámetros se puede elegir entre:
+//            - (1) modo interactivo (bucle en el que se introducen parámetros manualmente)
+//            - (2) función de prueba con los casos usados para evaluar el algoritmo en la memoria.
 
 #include <iostream>
 #include <vector>
