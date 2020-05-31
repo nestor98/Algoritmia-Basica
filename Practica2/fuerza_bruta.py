@@ -5,22 +5,24 @@ from escenario import leer_escenario
 from timeit import default_timer as timer
 from copy import deepcopy
 
+
 def distancia(pos0, posf):
     # distancia L1
-    return abs(posf[0]-pos0[0]) + abs(posf[1] - pos0[1])
+    return abs(posf[0] - pos0[0]) + abs(posf[1] - pos0[1])
 
 
-def expandir(nivel, pos0, lista, n_minas):
-    print("Expandiendo nodo " + str(nivel) + " " + str(lista) + "\n")
-    if nivel == n_minas: 
-        #no expandir más
-        return 0
+def expandir(nivel, pos0, posPadre, lista, n_minas, resultado):
+    # print("Expandiendo nodo " + str(nivel) + " " + str(lista) + " " + str(pos0) + "\n")
+    if nivel == n_minas:
+        # no expandir más
+        return distancia(posPadre, pos0)
     else:
-        resultado = math.inf
-        for j,_ in enumerate(lista):
+        for j, _ in enumerate(lista):
             lista_restantes = deepcopy(lista)
             lista_restantes.pop(j)
-            coste = expandir(nivel + 1, lista[j], lista_restantes, n_minas) + distancia(pos0, lista[j])
+            coste = expandir(
+                nivel + 1, pos0, lista[j], lista_restantes, n_minas, resultado
+            ) + distancia(posPadre, lista[j])
             if coste < resultado:
                 resultado = coste
         return resultado
@@ -40,7 +42,9 @@ if __name__ == "__main__":
 
     for e in escenarios:
         start = timer()
-        upperBound = expandir(0, e.pos_ini, e.lista_minas, e.n_minas)
+        upperBound = expandir(
+            0, e.pos_ini, e.pos_ini, e.lista_minas, e.n_minas, math.inf
+        )
         end = timer()
         f_out.write(str(upperBound) + " " + str(end - start) + "\n")
         f_out.flush()
