@@ -4,6 +4,15 @@ import math
 from escenario import Escenario
 from copy import deepcopy
 from arbol import Nodo
+from timeit import default_timer as timer
+
+#tiempoCrearMatriz = 0.0
+#tiempoReducir = 0.0
+#tiempoReducir = 0.0
+#tiempoElegir = 0.0
+#tiempoExpandir1 = 0.0
+#tiempoExpandir2 = 0.0
+#tiempoSolucionarP2 = 0.0
 
 
 def distancia(pos0, posf):
@@ -12,9 +21,11 @@ def distancia(pos0, posf):
 
 
 def crearMatriz(e: Escenario):
-    n = e.getNumMinas()
+    #global tiempoCrearMatriz
+    #start = timer()
+    n = e.n_minas
 
-    listaMinas = e.getMinas()
+    listaMinas = e.lista_minas
 
     m = np.zeros((n+1, n+1), dtype=float)
 
@@ -31,64 +42,52 @@ def crearMatriz(e: Escenario):
                     d = distancia(listaMinas[i-1], listaMinas[j-1])
                 m[i, j] = d
                 m[j, i] = d
-
+    #tiempoCrearMatriz += timer() - start
     return m
 
 
 def reducirMatrizFilas(orig):
     m = orig
-    restado = 0
+    min = m.min(axis=1)
+    min[min == math.inf] = 0
 
-    for i, fila in enumerate(m):
-        min = math.inf
-        for elemento in fila:
-            if elemento < min:
-                min = elemento
-                if elemento == 0:
-                    break
-        if min != math.inf:
-            restado += min
-            for j, elemento in enumerate(fila):
-                m[i, j] -= min
+    restado = np.sum(min)
+    m = m - min[:, None]
 
-    return restado
+    return (m, restado)
 
 
 def reducirMatrizColumnas(orig):
-    m = np.transpose(orig)
-    restado = 0
+    m = orig
+    min = m.min(axis=0)
+    min[min == math.inf] = 0
 
-    for j, columna in enumerate(m):
-        min = math.inf
-        for elemento in columna:
-            if elemento < min:
-                min = elemento
-                if elemento == 0:
-                    break
+    restado = np.sum(min)
+    m = m - min
 
-        if min != math.inf:
-            restado += min
-            for i, elemento in enumerate(columna):
-                m[j, i] -= min
-
-    return restado
+    return (m, restado)
 
 
 def reducir(m):
-    aux = reducirMatrizFilas(m)
-    aux += reducirMatrizColumnas(m)
-    print("reduccion:" + str(aux))
-    return aux
+    #global tiempoReducir
+    #start = timer()
+    m, aux = reducirMatrizFilas(m)
+    m, aux2 = reducirMatrizColumnas(m)
+    aux += aux2
+    #print("reduccion:" + str(aux))
+    #tiempoReducir += timer() - start
+    return (m, aux)
 
 
 def elegirReducir(n: Nodo, je):
+    #global tiempoElegir
+    #start = timer()
     m = deepcopy(n.matriz)
 
     ie = n.i
 
-    for i in range(len(m)):
-        m[ie, i] = math.inf
-        m[i, je] = math.inf
+    m[ie, :] = math.inf
+    m[:, je] = math.inf
 
     # marcar la celda en sentido opuesto como infinito
     m[je, ie] = math.inf
@@ -99,8 +98,8 @@ def elegirReducir(n: Nodo, je):
         i_padre = padre.i
         m[je, i_padre] = math.inf
         padre = padre.n_padre
-
-    return (m, reducir(m))
+    #tiempoElegir += timer() - start
+    return reducir(m)
 
 
 def funcionCoste(m0, i, j, c0, r):
@@ -129,47 +128,54 @@ def funcionCoste(m0, i, j, c0, r):
 
 
 def expandirNodo(n: Nodo, e: Escenario, colaActivos, upperBound, n_activos):
-    # print("Expandiendo nodo " + str(n.i_nodo) + "\n")
+    #global tiempoExpandir1
+    #global tiempoExpandir2
+    #start1 = timer()
+    #print("Expandiendo nodo " + str(n.i_nodo) + " de coste " + str(n.coste) + "\n")
     resultado = -1
     m0 = n.matriz
     c0 = n.coste
+    n_pos = e.n_minas + 1
     i = n.i
-    c = float('Inf')
-    # para todas las minas
-    for j in range(0, e.getNumMinas()+1):
-        # no volver a minas ya visitadas (coste infinito)
-        if n.matriz[n.i, j] != math.inf:
-            # calculamos coste
-            m, r = elegirReducir(n, j)
-            c = funcionCoste(m0, i, j, c0, r)
+    c = math.inf
+    # no iterar si se ha superado ya el upperBound en el nodo a expandir (safe-check)
+    if c0 < upperBound:
+        # para todas las minas
+        for j in range(n_pos):
+            # no volver a minas ya visitadas (coste infinito)
+            if m0[i, j] != math.inf:
+                # calculamos coste
+                m, r = elegirReducir(n, j)
+                c = funcionCoste(m0, i, j, c0, r)
 
-            # creamos el hijo
-            hijo = Nodo(c, j, n)
+                # creamos el hijo
+                hijo = Nodo(c, j, n)
 
-            # añadimos el nuevo hijo que aún no se ha expandido
-            if c <= upperBound:
-                hijo.addMatriz(m)
-                heapq.heappush(colaActivos, hijo)
-                n_activos += 1
-            n.addHijo(hijo)
-
-    # si al acabar el bucle n solo tiene un hijo, quiere decir que dicho hijo es un nodo hoja
-    if n.n_hijos < 2 and c <= upperBound:
-        # no es necesario expandir el hijo, pues ya es un nodo hoja
-        hoja = heapq.heappop(colaActivos)
-        n_activos -= 1
-        resultado = hoja.coste
-
+                # añadimos el nuevo hijo que aún no se ha expandido
+                if c <= upperBound:
+                    hijo.addMatriz(m)
+                    heapq.heappush(colaActivos, hijo)
+                    n_activos += 1
+                n.addHijo(hijo)
+        #tiempoExpandir1 += timer() - start1
+        # si al acabar el bucle n solo tiene un hijo, quiere decir que dicho hijo es un nodo hoja
+        #start2 = timer()
+        if n.n_hijos < 2 and c <= upperBound:
+            # no es necesario expandir el hijo, pues ya es un nodo hoja
+            hoja = heapq.heappop(colaActivos)
+            n_activos -= 1
+            resultado = hoja.coste
+        #tiempoExpandir2 += timer() - start2
     return (resultado, n_activos)
 
 
 def solucionar(e: Escenario):
-
+    #global tiempoSolucionarP2
     n_activos = 1
 
     # calcular raiz
     m0 = crearMatriz(e)
-    c0 = reducir(m0)
+    m0, c0 = reducir(m0)
 
     arbol = Nodo(c0, 0, None)
     arbol.addMatriz(m0)
@@ -184,6 +190,7 @@ def solucionar(e: Escenario):
         nodo = heapq.heappop(colaActivos)
         n_activos -= 1
         # puesto que solo deseamos conocer el mínimo de pasos, pero no las soluciones, no es necesario expandir nodos no-hoja con coste = upperBound
+        #start2 = timer()
         if nodo.coste < upperBound:
             bound, n_activos = expandirNodo(
                 nodo, e, colaActivos, upperBound, n_activos)
@@ -191,6 +198,14 @@ def solucionar(e: Escenario):
             nodo.desactivar
         if bound != -1 and bound < upperBound:
             upperBound = bound
-            # print("Nodo hoja encontrado. UpperBound = " + str(upperBound) + "\n")
+            #print("Nodo hoja encontrado. UpperBound = " + str(upperBound) + "\n")
+        #tiempoSolucionarP2 += timer() - start2
+
+    #print("Crear Matriz: " + str(tiempoCrearMatriz) + "\n")
+    #print("Reducir: " + str(tiempoReducir) + "\n")
+    #print("Elegir: " + str(tiempoElegir) + "\n")
+    #print("Expandir1: " + str(tiempoExpandir1) + "\n")
+    #print("Expandir2: " + str(tiempoExpandir2) + "\n")
+    #print("SolucionarP2: " + str(tiempoSolucionarP2) + "\n")
 
     return (int(upperBound), arbol)
