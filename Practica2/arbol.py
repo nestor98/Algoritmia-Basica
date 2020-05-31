@@ -18,14 +18,14 @@ class Nodo:
         self.n_hijos = 0
         self.n_padre = n_padre
         self.activo = True
-        if self.n_padre == None:
-            padre_string = None
-            print("Creado nodo" + str(self.i_nodo) + ", con mina " +
-                  str(self.i) + ", coste " + str(self.coste) + " y sin padre\n")
-        else:
-            padre_string = str(self.n_padre.i_nodo)
-            print("Creado nodo" + str(self.i_nodo) + ", con mina " +
-                  str(self.i) + ", coste " + str(self.coste) + " y padre " + padre_string + "\n")
+        # if self.n_padre == None:
+        #    padre_string = None
+        #    print("Creado nodo" + str(self.i_nodo) + ", con mina " +
+        #          str(self.i) + ", coste " + str(self.coste) + " y sin padre\n")
+        # else:
+        #    padre_string = str(self.n_padre.i_nodo)
+        #    print("Creado nodo" + str(self.i_nodo) + ", con mina " +
+        #          str(self.i) + ", coste " + str(self.coste) + " y padre " + padre_string + "\n")
 
     def addMatriz(self, matriz):
         if self.activo:
