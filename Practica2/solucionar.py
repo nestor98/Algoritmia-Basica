@@ -37,7 +37,7 @@ def crearMatriz(e: Escenario):
                 m[i, j] = math.inf
             else:
                 if i == 0: # distancia al punto inicial
-                    d = distancia(e.getPosIni(), listaMinas[j-1])
+                    d = distancia(e.pos_ini, listaMinas[j-1])
                 else: # distancia entre minas
                     d = distancia(listaMinas[i-1], listaMinas[j-1])
                 m[i, j] = d
@@ -192,7 +192,11 @@ def solucionar(e: Escenario):
     m0 = crearMatriz(e) # matriz de costes a partir del escenario
     m0, c0 = reducir(m0) # reduccion de filas y columnas (c0 el coste)
 
-    arbol = Nodo(c0, 0, None) # inicializamos el nodo
+    arbol = Nodo(c0, 0, None)  # inicializamos el nodo
+    
+    if e.n_minas == 0:      #comprobar que el numero de minas es mayor que 0, sino, devolver coste 0 y solo el nodo raiz
+        return (0, arbol)
+
     arbol.addMatriz(m0) # y le añadimos la matriz
 
     upperBound = math.inf # al principio el limite es infinito
@@ -206,6 +210,7 @@ def solucionar(e: Escenario):
         n_activos -= 1
         # puesto que solo deseamos conocer el mínimo de pasos, pero no las soluciones, no es necesario expandir nodos no-hoja con coste = upperBound
         #start2 = timer()
+
         if nodo.coste < upperBound:
             bound, n_activos = expandirNodo(
                 nodo, e, colaActivos, upperBound, n_activos)
