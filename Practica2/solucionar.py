@@ -1,4 +1,5 @@
 import numpy as np
+import heapq
 import math
 from escenario import Escenario
 from copy import deepcopy
@@ -7,7 +8,7 @@ from arbol import Nodo
 
 def distancia(pos0, posf):
     # distancia L1
-    return abs(posf[0]-pos0[0] + posf[1] - pos0[1])
+    return abs(posf[0]-pos0[0]) + abs(posf[1] - pos0[1])
 
 
 def crearMatriz(e: Escenario):
@@ -76,6 +77,7 @@ def reducirMatrizColumnas(orig):
 def reducir(m):
     aux = reducirMatrizFilas(m)
     aux += reducirMatrizColumnas(m)
+    print("reduccion:" + str(aux))
     return aux
 
 
@@ -126,30 +128,13 @@ def funcionCoste(m0, i, j, c0, r):
     return c0 + m0[i, j] + r
 
 
-def addOrdenado(lista, nuevo):
-    if len(lista) == 0:
-        lista.append(nuevo)
-    else:
-        notFound = True
-        i = 0
-        while i < len(lista) and notFound:
-            if lista[i].coste < nuevo.coste:
-                i += 1
-            else:
-                notFound = False
-        lista.insert(i, nuevo)
-
-    # for elemento in lista:
-    #    print(str(elemento.i) + "   " + str(elemento.coste))
-
-
-def expandirNodo(n: Nodo, e: Escenario, colaActivos, upperBound):
-    #print("Expandiendo nodo " + str(n.i_nodo) + "\n")
+def expandirNodo(n: Nodo, e: Escenario, colaActivos, upperBound, n_activos):
+    # print("Expandiendo nodo " + str(n.i_nodo) + "\n")
     resultado = -1
     m0 = n.matriz
     c0 = n.coste
     i = n.i
-    colaActivos.pop(0)  # eliminamos n puesto que ya se ha expandido
+    c = float('Inf')
     # para todas las minas
     for j in range(0, e.getNumMinas()+1):
         # no volver a minas ya visitadas (coste infinito)
@@ -164,23 +149,23 @@ def expandirNodo(n: Nodo, e: Escenario, colaActivos, upperBound):
             # añadimos el nuevo hijo que aún no se ha expandido
             if c <= upperBound:
                 hijo.addMatriz(m)
-                addOrdenado(colaActivos, hijo)
+                heapq.heappush(colaActivos, hijo)
+                n_activos += 1
             n.addHijo(hijo)
 
     # si al acabar el bucle n solo tiene un hijo, quiere decir que dicho hijo es un nodo hoja
-    if n.n_hijos < 2:
+    if n.n_hijos < 2 and c <= upperBound:
         # no es necesario expandir el hijo, pues ya es un nodo hoja
-        if c <= upperBound:
-            hoja = colaActivos.pop(0)
+        hoja = heapq.heappop(colaActivos)
+        n_activos -= 1
         resultado = hoja.coste
 
-    return resultado
+    return (resultado, n_activos)
 
 
 def solucionar(e: Escenario):
 
-    colaActivos = []
-    soluciones = []
+    n_activos = 1
 
     # calcular raiz
     m0 = crearMatriz(e)
@@ -190,26 +175,22 @@ def solucionar(e: Escenario):
     arbol.addMatriz(m0)
 
     upperBound = math.inf
-    addOrdenado(colaActivos, arbol)
+
+    colaActivos = [arbol]
+    heapq.heapify(colaActivos)
 
     # calcular hijos
-    while (len(colaActivos) > 0):
-        nodo = colaActivos[0]
-        bound = expandirNodo(nodo, e, colaActivos, upperBound)
+    while (n_activos > 0):
+        nodo = heapq.heappop(colaActivos)
+        n_activos -= 1
+        # puesto que solo deseamos conocer el mínimo de pasos, pero no las soluciones, no es necesario expandir nodos no-hoja con coste = upperBound
+        if nodo.coste < upperBound:
+            bound, n_activos = expandirNodo(
+                nodo, e, colaActivos, upperBound, n_activos)
+        else:
+            nodo.desactivar
         if bound != -1 and bound < upperBound:
             upperBound = bound
-            soluciones.append(nodo)
-            #print("Nodo hoja encontrado. UpperBound = " + str(upperBound) + "\n")
-            i = len(colaActivos) - 1
-            n = colaActivos[i]
-            while i > 0 and n.coste >= upperBound:
-                # n.desactivar
-                colaActivos.pop(i)
-                i -= 1
-                n = colaActivos[i]
+            # print("Nodo hoja encontrado. UpperBound = " + str(upperBound) + "\n")
 
-            for j, s in enumerate(soluciones):
-                if s.coste > upperBound:
-                    soluciones.pop(j)
-
-    return (int(upperBound), soluciones, arbol)
+    return (int(upperBound), arbol)

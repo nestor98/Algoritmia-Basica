@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
     for e in escenarios:
         start = timer()
-        upperBound, soluciones, arbol = solucionar(e)
+        upperBound, arbol = solucionar(e)
         end = timer()
         f_out.write(str(upperBound) + " " + str(end - start) + "\n")
         f_out.flush()

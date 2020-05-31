@@ -8,7 +8,10 @@ class Escenario:
         self.lista_minas = []
 
     def addMina(self, mina):
-        self.lista_minas.append(mina)
+        if mina not in self.lista_minas:
+            self.lista_minas.append(mina)
+        else:
+            self.n_minas -= 1
 
     def getNumMinas(self):
         return self.n_minas
