@@ -1,7 +1,11 @@
+# Autores: Monzón González, Néstor
+#          Otero García, Andrés
+
 
 def line_to_tuple(linea):
-    lista = linea.replace("\n", "").split(' ')
+    lista = linea.replace("\n", "").split(" ")
     return (int(lista[0]), int(lista[1]))
+
 
 def leer_escenario(f):
     # la primera línea son las dimensiones
@@ -22,9 +26,7 @@ def leer_escenario(f):
     return e
 
 
-
 class Escenario:
-
     def __init__(self, d, p, n):
         self.dim = d
         self.pos_ini = p
@@ -37,11 +39,15 @@ class Escenario:
         else:
             self.n_minas -= 1
 
-    def toString(self):
-        string = "Escenario de dimensiones " + \
-            str(self.dim[0]) + "x" + str(self.dim[1])
-        string += ", con posicion inicial (" + str(self.pos_ini[0]) + ", " + str(
-            self.pos_ini[1]) + ") y minas en las siguientes posiciones:\n"
+    def __str__(self):
+        string = "Escenario de dimensiones " + str(self.dim[0]) + "x" + str(self.dim[1])
+        string += (
+            ", con posicion inicial ("
+            + str(self.pos_ini[0])
+            + ", "
+            + str(self.pos_ini[1])
+            + ") y minas en las siguientes posiciones:\n"
+        )
         for mina in self.lista_minas:
             string += "(" + str(mina[0]) + ", " + str(mina[1]) + ")\n"
         return string
