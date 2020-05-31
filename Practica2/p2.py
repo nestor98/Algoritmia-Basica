@@ -1,10 +1,16 @@
+"""
+Autores: Andres Otero y Nestor Monzon
+Asignatura: Algoritmia Básica
+Ejecucion: python3 p2.py <entrada.txt> <salida.txt>
+Escribe en <salida.txt> las soluciones (y los tiempos) a los escenarios descritos en
+<entrada.txt>, ambos con la sintaxis descrita en el enunciado de la práctica
+"""
 import sys
 from escenario import Escenario
 from escenario import leer_escenario
 from solucionar import solucionar
 from timeit import default_timer as timer
 from arbol import Nodo
-
 
 if __name__ == '__main__':
 
