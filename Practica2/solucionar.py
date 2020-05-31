@@ -33,12 +33,12 @@ def crearMatriz(e: Escenario):
         # iterar solo en la mitad superior (es una matriz simetrica por las propiedades del problema)
         for j in range(i, n + 1):
 
-            if i == j:
+            if i == j: # Diagonal a infinito
                 m[i, j] = math.inf
             else:
-                if i == 0:
+                if i == 0: # distancia al punto inicial
                     d = distancia(e.getPosIni(), listaMinas[j-1])
-                else:
+                else: # distancia entre minas
                     d = distancia(listaMinas[i-1], listaMinas[j-1])
                 m[i, j] = d
                 m[j, i] = d
@@ -47,17 +47,27 @@ def crearMatriz(e: Escenario):
 
 
 def reducirMatrizFilas(orig):
+    """
+    Input: matriz original de costes
+    Output: Primero: matriz en la que a cada elto se le ha restado el minimo de su fila
+            Segundo: coste de la reduccion (suma de los minimos)
+    """
     m = orig
-    min = m.min(axis=1)
-    min[min == math.inf] = 0
+    min = m.min(axis=1) # minimo en cada fila
+    min[min == math.inf] = 0 # si eran todo infinitos, 0
 
-    restado = np.sum(min)
-    m = m - min[:, None]
+    restado = np.sum(min) # suma de los minimos
+    m = m - min[:, None] # se reduce cada fila restandole a cada elto el min
 
     return (m, restado)
 
 
 def reducirMatrizColumnas(orig):
+    """
+    Input: matriz original de costes
+    Output: Primero: matriz en la que a cada elto se le ha restado el minimo de su columna
+            Segundo: coste de la reduccion (suma de los minimos)
+    """
     m = orig
     min = m.min(axis=0)
     min[min == math.inf] = 0
@@ -69,11 +79,16 @@ def reducirMatrizColumnas(orig):
 
 
 def reducir(m):
+    """
+    Input: matriz m donde cada celda (i, j) es el coste para ir desde la mina i a la j
+    Output: Primer argumento: nueva matriz de costes (tras reducirla)
+            Segundo: coste de reducción
+    """
     #global tiempoReducir
     #start = timer()
-    m, aux = reducirMatrizFilas(m)
-    m, aux2 = reducirMatrizColumnas(m)
-    aux += aux2
+    m, aux = reducirMatrizFilas(m) # reducir filas
+    m, aux2 = reducirMatrizColumnas(m) # y columnas
+    aux += aux2 # coste de reduccion total
     #print("reduccion:" + str(aux))
     #tiempoReducir += timer() - start
     return (m, aux)
@@ -170,20 +185,20 @@ def expandirNodo(n: Nodo, e: Escenario, colaActivos, upperBound, n_activos):
 
 
 def solucionar(e: Escenario):
-    #global tiempoSolucionarP2
+
     n_activos = 1
 
     # calcular raiz
-    m0 = crearMatriz(e)
-    m0, c0 = reducir(m0)
+    m0 = crearMatriz(e) # matriz de costes a partir del escenario
+    m0, c0 = reducir(m0) # reduccion de filas y columnas (c0 el coste)
 
-    arbol = Nodo(c0, 0, None)
-    arbol.addMatriz(m0)
+    arbol = Nodo(c0, 0, None) # inicializamos el nodo
+    arbol.addMatriz(m0) # y le añadimos la matriz
 
-    upperBound = math.inf
+    upperBound = math.inf # al principio el limite es infinito
 
     colaActivos = [arbol]
-    heapq.heapify(colaActivos)
+    heapq.heapify(colaActivos) # pasamos la lista a monticulo para mejorar la eficiencia
 
     # calcular hijos
     while (n_activos > 0):

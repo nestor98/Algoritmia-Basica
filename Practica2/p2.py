@@ -4,7 +4,6 @@ from solucionar import solucionar
 from timeit import default_timer as timer
 from arbol import Nodo
 
-
 def line_to_tuple(linea):
     lista = linea.replace("\n", "").split(' ')
     return (int(lista[0]), int(lista[1]))
@@ -46,6 +45,7 @@ if __name__ == '__main__':
     escenarios = []
 
     for i in range(n):
+        # print(i)
         escenarios.append(leer_escenario(f))
 
     for e in escenarios:
@@ -55,10 +55,10 @@ if __name__ == '__main__':
         f_out.write(str(upperBound) + " " + str(end - start) + "\n")
         f_out.flush()
 
-        asdf = 0
-        for e in arbol.listaHijos:
-            asdf = recorrer(arbol)
-        print(asdf)
+        # asdf = 0
+        # for e in arbol.listaHijos:
+        #     asdf = recorrer(arbol)
+        # print(asdf)
 
     f.close()
     f_out.close()
